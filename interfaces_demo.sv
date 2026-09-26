@@ -2,6 +2,9 @@
 interface dcd_int(input bit CLK);
     logic [3: 0] Q, P;
     logic MR, load, en;
+
+    modport DUT(input P, MR, load, en, CLK, output Q);
+    modport driver(output P, MR, load, en, input Q, CLK); // Generates the stimulus, thus the inputs are outputs.
 endinterface
 
 module dcd_counter(dcd_int inst);
@@ -46,8 +49,8 @@ module top;
     always #5 clk = ~clk;
     
     dcd_int inter(clk);
-    dcd_counter counter(.inst(inter));
-    dcd_test test(.inst(inter));
+    dcd_counter counter(.inst(inter.DUT));
+    dcd_test test(.inst(inter.driver));
 
     initial begin
         $dumpfile("counter.vcd");
